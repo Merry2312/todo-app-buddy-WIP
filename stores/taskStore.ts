@@ -16,19 +16,29 @@ export const useTaskStore = defineStore('task', {
 
             this.loading = false;
         },
-        async addTask(title: string): Promise<void> {
-            return taskService.insertTask(title).then(async () => {
-                await this.requestTasks();
+        async createTask(title: string): Promise<void> {
+            return taskService.createTask(title).then((task: Task) => {
+                this.tasks = [...this.tasks, task];
             }).catch((error) => {
-                console.log("Failure! " + error);
+                console.log("Failed to create task " + error);
             });
-        }
-        // async completeTask(task: Task): Promise<void> {
-        //     return taskService.completeTask(task).then(() => {
-        //         task.completed = true;
-        //     }).catch((error) => {
-        //         console.log("Failure! " + error);
-        //     });
-        // }
+        },
+        async deleteTask(uuid: string): Promise<void> {
+            return taskService.deleteTask(uuid).then(() => {
+                this.tasks = this.tasks.filter((task) => task.uuid != uuid);
+            }).catch((error) => {
+                console.log("Failed to delete task " + error);
+            });
+        },    
+        async toggleTask(uuid: string, isDone: boolean): Promise<void> {
+            return taskService.toggleTask(uuid, isDone).then(() => {
+                this.tasks = this.tasks.map((task) => task.uuid == uuid ? { ...task, isDone: isDone } : task);
+            }).catch((error) => {
+                console.log("Failed to update task state " + error);
+            });
+        },
+        reorderTasks(newOrder: Task[]): void {
+            this.tasks = newOrder;
+        },
     },
 });
